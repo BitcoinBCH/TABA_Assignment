@@ -1,3 +1,38 @@
+if(!require(shiny)){install.packages("shiny")}
+if(!require(shinydashboard)){install.packages("shinydashboard")}
+if(!require(shinythemes)){install.packages("shinythemes")}
+if(!require(udpipe)){install.packages("udpipe")}
+if(!require(textrank)){install.packages("textrank")}
+if(!require(lattice)){install.packages("lattice")}
+if(!require(igraph)){install.packages("igraph")}
+if(!require(ggraph)){install.packages("ggraph")}
+if(!require(ggplot2)){install.packages("ggplot2")}
+if(!require(wordcloud)){install.packages("wordcloud")}
+if(!require(stringr)){install.packages("stringr")}
+if (!require(extrafont)){install.packages("extrafont")} 
+if (!require(extrafontdb)){install.packages("extrafontdb")}
+library(extrafont)
+library(extrafontdb)
+loadfonts(device = "win")
+#font_import()
+library(shiny)
+library(shinydashboard)
+library(shinythemes)
+library(udpipe)
+library(textrank)
+library(lattice)
+library(igraph)
+library(ggraph)
+library(ggplot2)
+library(wordcloud)
+library(stringr)
+
+#Implemented By
+#TABA Question 1
+#11810057 Megha Goel
+#11810099 Gaurav Borse
+#11810036 Shariq Imam
+
 options(shiny.maxRequestSize=30*1024^2)
 
 # Different language models 
@@ -26,12 +61,17 @@ ui <- fluidPage(
                  fileInput("model","Choose a model",
                            multiple = FALSE,
                            accept = ".udipipe"),
-                 checkboxGroupInput("POS","POS",
-                                    c("Adjective"="JJ",
-                                      "Noun"="NN",
-                                      "Proper Noun"="NNP",
-                                      "Adverb"="RB",
-                                      "Verb"="VB"),selected = c("JJ","NN","NNP")),
+                 checkboxGroupInput("POS","Parts of Speech",
+                                    c("1. Adjective (JJ)"="JJ",
+                                      "2. Noun (NN)"="NN",
+                                      "3. Proper Noun (NNP)"="NNP",
+                                      "4. Adverb (RB)"="RB",
+                                      "5. Verb (VB)"="VB",
+                                      "6. Adjective"="ADJECTIVE",
+                                      "7. Noun"="NOUN",
+                                      "8. Proper Noun"="PROPER NOUN",
+                                      "9. Adverb"="ADVERB",
+                                      "10. Verb"="VERB"),selected = c("JJ","NN","NNP")),
                  sliderInput("max","Minimum frequency in the Co Occurence graph:",min = 0,max= 200,value =2)
             ),
       mainPanel(
@@ -43,16 +83,17 @@ ui <- fluidPage(
                                        p(' source("https://raw.githubusercontent.com/BitcoinBCH/TABA_Assignment/master/dependencies.R")'),
                                        p("* Now browse the text file."),
                                        p("* Browse the UDPipe model. We've provided the UDPipe model for English, Hindi & Spanish in mail, we couldn't uploaded in the github account as the file size is more."),
-                                       p("* Select the Part of Speech"),
+                                       p("* While selecting the Part of Speech, you need select in the following ways"),
+                                       p("* By Default XPOS will be selected, i.e. JJ,NN & NNP, but when you select the spanish text file and it's model, then you need select the normal Adjective, Noun, etc. UPOS from 6 point onwards."),
                                        p("* Select the number of word Frequency which we will appear on the Co Occurence graph"),
                                        p("Now traverse through the tabs within the application")
                               ),
                               tabPanel("Data",
-                                       verbatimTextOutput("x")),
+                                       verbatimTextOutput("data")),
                               tabPanel("Model",
-                                       verbatimTextOutput("sub")),
+                                       verbatimTextOutput("model")),
                               tabPanel("Co Occurence graph", 
-                                       plotOutput("cooc"),
+                                       plotOutput("occur"),
                                        verbatimTextOutput("info"))
                   ) # end of tabsetPanel
                 )
@@ -63,6 +104,7 @@ server <- function (input,output ,session){
   readContent <- reactive({
     count <- nchar(input$file1$datapath)
     fileTextType <- substr(input$file1$datapath, (count - 2) , nchar(input$file1$datapath))
+    fileTextname <- substr(input$file1$datapath, (count - 8) , nchar(input$file1$datapath))
     if (fileTextType != 'txt') {
       errorMessage = "Please upload the file which is of .txt extension"
       errorMessage
@@ -72,33 +114,38 @@ server <- function (input,output ,session){
     }
   })
   
-  x <- reactive({
+  datacollection <- reactive({
     req(input$file1)
     readContent()
     req(input$model)
     mod <- input$model
     ud_model <- udpipe_load_model(mod$datapath)
-    x <- udpipe_annotate(ud_model,x=readContent())
-    x <- as.data.frame(x)
-    return(x)
+    datastore <- udpipe_annotate(ud_model,x=readContent())
+    datastore <- as.data.frame(datastore)
+    return(datastore)
   })
   
-  sub <-reactive({
-    x <- x()
-    sub <- subset(x, xpos %in% input$POS)
-    sub
-    return(sub)
+  datamodel <-reactive({
+    
+    getdata <- datacollection()
+    language = gregexpr("spanish", input$file1$name,ignore.case = FALSE)
+    if (language == 1) {
+      collect <- subset(getdata, upos %in% input$POS)
+    } else {
+      collect <- subset(getdata, xpos %in% input$POS)
+    }
+    return (collect)
   })
   
-  output$x <- renderText({     fileText <- paste(readContent(), collapse = "\n");     fileText   ;})
-  output$sub <- renderText({     fileText <- paste(sub(), collapse = "\n");     fileText   ;})
-  output$cooc <- renderPlot({
+  output$data <- renderText({     fileText <- paste(readContent(), collapse = "\n");     fileText   ;})
+  output$model <- renderText({     fileText <- paste(datamodel(), collapse = "\n");     fileText   ;})
+  output$occur <- renderPlot({
     readContent()
-    sub = sub()
-    cooc <- cooccurrence( x= sub,
+    subcontent = datamodel()
+    occur <- cooccurrence( x= subcontent,
                           term = "lemma",
                           group = c("doc_id","paragraph_id","sentence_id"))
-    wordnetwork <- head(cooc,input$max)
+    wordnetwork <- head(occur,input$max)
     wordnetwork <- igraph::graph_from_data_frame(wordnetwork)
       ggraph(wordnetwork,layout= "fr")+
       geom_edge_link(aes(width=cooc,edge_alpha= cooc),edge_colour= "blue")+
