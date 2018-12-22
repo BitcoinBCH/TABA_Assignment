@@ -1,3 +1,9 @@
+#Implemented By
+#TABA Question 1
+#11810057 Megha Goel
+#11810099 Gaurav Borse
+#11810036 Shariq Imam
+
 if(!require(shiny)){install.packages("shiny")}
 if(!require(shinydashboard)){install.packages("shinydashboard")}
 if(!require(shinythemes)){install.packages("shinythemes")}
@@ -26,12 +32,6 @@ library(ggraph)
 library(ggplot2)
 library(wordcloud)
 library(stringr)
-
-#Implemented By
-#TABA Question 1
-#11810057 Megha Goel
-#11810099 Gaurav Borse
-#11810036 Shariq Imam
 
 options(shiny.maxRequestSize=30*1024^2)
 
