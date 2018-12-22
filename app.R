@@ -52,6 +52,7 @@ ui <- fluidPage(
                                        p("* This app supports only text file i.e. (.txt file), we've added this validation while we click on the Data Tab not in Model & Co Occurence graph.",align="justify"),
                                        p("* Please run the below command from R Console, which is responsible for loading the dependencies related to this App."),
                                        p(' source("https://raw.githubusercontent.com/BitcoinBCH/TABA_Assignment/master/dependencies.R")'),
+                                       p('runGitHub("TABA_Assignment","BitcoinBCH")'),
                                        p("* Now browse the text file."),
                                        p("* Browse the UDPipe model. We've provided the UDPipe model for English, Hindi & Spanish in mail, we couldn't uploaded in the github account as the file size is more."),
                                        p("* While selecting the Part of Speech, you need select in the following ways"),
