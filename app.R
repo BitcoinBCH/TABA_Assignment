@@ -119,9 +119,16 @@ server <- function (input,output ,session){
     } else {
       errorMessage = "";errorMessage;
       datacontent <- readLines(input$file1$datapath)
-      datacontent <- gsub('AM', '', datacontent)  
-      datacontent <- gsub('kg', '', datacontent)
-      datacontent <-  gsub('PM', '', datacontent) 
+      language = gregexpr("english", input$file1$name,ignore.case = FALSE)
+      if (language == 1) {
+        datacontent <- gsub('AM', '', datacontent)  
+        datacontent <-  gsub('PM', '', datacontent)
+        datacontent <- gsub('kg', '', datacontent)
+        datacontent <- gsub("\\s"," ",datacontent) 
+        datacontent <- gsub('[[:digit:]]+', '', datacontent) %>% str_replace_all("[[:punct:]]", " ")%>% str_trim()
+      } else {
+        datacontent
+      }
     }
   })
   
