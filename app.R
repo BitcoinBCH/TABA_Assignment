@@ -26,10 +26,10 @@ ui <- fluidPage(
       ""
     )
   ),
-  sidebarPanel(width =4,fileInput("file1","Choose txt file",
+  sidebarPanel(width =4,fileInput("file1","Choose the text file",
                                   multiple = TRUE,
                                   accept = c("*.txt")),
-               fileInput("languageModel","Choose a Model",
+               fileInput("languageModel","Choose the Model",
                          multiple = FALSE,
                          accept = ".udipipe"),
                checkboxGroupInput("POS","Parts of Speech",
