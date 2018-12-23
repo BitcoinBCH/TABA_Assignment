@@ -122,8 +122,6 @@ server <- function (input,output ,session){
       datacontent <- gsub('AM', '', datacontent)  
       datacontent <- gsub('kg', '', datacontent)
       datacontent <-  gsub('PM', '', datacontent) 
-      datacontent <- gsub("\\s"," ",datacontent) 
-      datacontent <- gsub('[[:digit:]]+', '', datacontent) %>% str_replace_all("[[:punct:]]", " ")%>% str_trim()
     }
   })
   
